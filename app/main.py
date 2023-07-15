@@ -46,5 +46,4 @@ def generate_image():
 
 
 if __name__ == '__main__':
-    #設定port
     app.run()
