@@ -1,0 +1,5 @@
+flask
+pytest
+Pillow
+yapf
+google-cloud-logging
