@@ -4,6 +4,7 @@ import logging
 import requests
 import json
 import google.cloud.logging
+from datetime import datetime
 from flask import Flask, request, send_file, jsonify, abort
 from PIL import Image
 
@@ -25,12 +26,15 @@ logging.basicConfig(
 
 def send_log_to_GA(err):
     try:
+        now = datetime.now()
+        time = datetime.strftime(now, "%Y-%m-%d %H:%M:%S")
+        mes = time + ": " + err
         payload = {
             'client_id': 'junis',
             'events': [{
                 'name': 'log',
                 'params': {
-                    'log': err
+                    'log': mes
                 },
             }]
         }
@@ -40,7 +44,7 @@ def send_log_to_GA(err):
                           data=json.dumps(payload),
                           verify=True)
     except requests.exceptions.RequestException as e:
-        logging.warning(e)
+        logging.warning("Send data to GA event fail")
 
 
 def generate_image(width, height):
