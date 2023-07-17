@@ -1,7 +1,4 @@
-#指令 python -m pytest -vv
-
 import pytest
-import requests
 import json
 from PIL import Image
 from io import BytesIO
@@ -19,12 +16,16 @@ def client():
 def test_generate_image(client):
     response = client.post('/generate_image',
                            json={
-                               "width": "100",
-                               "height": "100"
+                               "width": "1920",
+                               "height": "1080"
                            })
     assert response.status_code == 200
     assert response.content_type == 'image/png'
-    #要驗證png的的大小
+    # Check the image size
+    image_data = BytesIO(response.data)
+    image = Image.open(image_data)
+    assert image.width == 1920
+    assert image.height == 1080
 
 
 def test_invalid_data(client):
@@ -33,17 +34,24 @@ def test_invalid_data(client):
                                "width": "abc",
                                "height": "100"
                            })
+    jsonResponse = json.loads(response.text)
     assert response.status_code == 400
-
+    assert jsonResponse['data-error'] == 'request data contains non-number elements'
 
 def test_data_not_json(client):
     response = client.post('/generate_image', "test string")
+
+    jsonResponse = json.loads(response.text)
     assert response.status_code == 400
+    assert jsonResponse['data-error'] == 'request data not JSON format'
 
 
 def test_generate_image_not_json(client):
     response = client.post('/generate_image')
+
+    jsonResponse = json.loads(response.text)
     assert response.status_code == 400
+    assert jsonResponse['data-error'] == 'request data not JSON format'
 
 
 if __name__ == '__main__':
